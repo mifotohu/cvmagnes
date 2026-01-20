@@ -1,25 +1,22 @@
 {
-  "name": "copy-of-hr-magnes",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
+  "name": "hr-magnet-2026",
+  "version": "1.0.0",
+  "description": "ATS-optimalizált HR technológiai asszisztens",
+  "main": "index.tsx",
   "dependencies": {
-  "clsx": "^2.1.0",
-  "tailwind-merge": "^2.2.0",
-  "lucide-react": "latest", 
-  "next": "14.0.4",
-  "react": "^18",
-  "react-dom": "^18"
-},
+    "@google/genai": "^1.35.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.1"
+  },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.7.3"
   }
 }
