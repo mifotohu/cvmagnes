@@ -1,5 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
-
+import { GoogleGenerativeAI } from "@google/generative-ai"
 export const generateHRMaterials = async (data: any) => {
   // Az API kulcsot kizárólag a process.env.API_KEY változóból nyerjük ki az előírások szerint.
   const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
