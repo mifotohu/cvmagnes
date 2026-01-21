@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai;
 
 export const generateHRMaterials = async (data: any) => {
   const apiKey = data.customApiKey || process.env.API_KEY;
