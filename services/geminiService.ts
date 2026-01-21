@@ -2,7 +2,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai;
 
 export const generateHRMaterials = async (data: any) => {
-  const apiKey = data.customApiKey || process.env.API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) throw new Error("API Key is missing");
 
   const ai = new GoogleGenAI({ apiKey });
