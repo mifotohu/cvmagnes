@@ -1,5 +1,5 @@
 
-import { GoogleGenerativeAI } from "@google/generative-ai;
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const generateHRMaterials = async (data: any) => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
