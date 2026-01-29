@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { generateHRMaterials } from './services/geminiService';
 import { ApplicationData, GenerationResult, StyleType, ToneType, AISkills, FileData, SkillMatch } from './types';
 import SkillSlider from './components/SkillSlider';
@@ -21,13 +21,21 @@ import {
   RefreshCw,
   ShieldAlert,
   BarChart3,
-  SearchCheck
+  SearchCheck,
+  Key,
+  HelpCircle,
+  ExternalLink
 } from 'lucide-react';
+
+const STORAGE_KEY = 'hr_magnet_api_key';
+const TIMESTAMP_KEY = 'hr_magnet_api_key_time';
+const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 óra
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerationResult | null>(null);
+  const [userApiKey, setUserApiKey] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<ApplicationData>({
@@ -46,6 +54,27 @@ const App: React.FC = () => {
       analysis: 3
     }
   });
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem(STORAGE_KEY);
+    const savedTime = localStorage.getItem(TIMESTAMP_KEY);
+
+    if (savedKey && savedTime) {
+      const now = Date.now();
+      if (now - parseInt(savedTime) < EXPIRY_MS) {
+        setUserApiKey(savedKey);
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(TIMESTAMP_KEY);
+      }
+    }
+  }, []);
+
+  const handleApiKeyChange = (val: string) => {
+    setUserApiKey(val);
+    localStorage.setItem(STORAGE_KEY, val);
+    localStorage.setItem(TIMESTAMP_KEY, Date.now().toString());
+  };
 
   const handleInputChange = (field: keyof ApplicationData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -97,18 +126,22 @@ const App: React.FC = () => {
       setError("Kérjük, adjon meg CV adatokat szövegesen vagy töltsön fel egy fájlt.");
       return;
     }
+    if (!userApiKey) {
+      setError("Kérjük, add meg a Google API kulcsodat a fejlécben!");
+      return;
+    }
 
     setLoading(true);
     setError(null);
     try {
-      const materials = await generateHRMaterials(formData);
+      const materials = await generateHRMaterials({ ...formData, customApiKey: userApiKey });
       setResult(materials);
       if (window.innerWidth < 1024) {
         document.getElementById('result-section')?.scrollIntoView({ behavior: 'smooth' });
       }
     } catch (err: any) {
       console.error(err);
-      setError("Hiba történt a generálás során. Kérjük, próbálja újra!");
+      setError("Hiba történt a generálás során. Ellenőrizd az API kulcsot!");
     } finally {
       setLoading(false);
     }
@@ -162,14 +195,59 @@ const App: React.FC = () => {
       </div>
 
       <header className="border-b border-white/5 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-4">
+          <div className="flex items-center space-x-4 shrink-0">
              <div className="flex items-center space-x-2 text-[11px] font-mono text-slate-500 bg-slate-800/50 px-3 py-1.5 rounded-full border border-white/5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
               <span>AI ENGINE ACTIVE</span>
             </div>
           </div>
-          <div className="text-blue-400 font-black tracking-tighter text-xl">HR MÁGNES 2026</div>
+
+          <div className="flex-grow max-w-xl flex items-center gap-3">
+            <div className="relative flex-grow group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500/50">
+                <Key className="w-4 h-4" />
+              </div>
+              <input 
+                type="password"
+                value={userApiKey}
+                onChange={(e) => handleApiKeyChange(e.target.value)}
+                placeholder="Google API kulcs (AIza...)"
+                className="w-full bg-slate-950/50 border border-white/10 rounded-xl pl-9 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500/50 transition-all outline-none font-mono"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 group/tooltip">
+                <HelpCircle className="w-4 h-4 text-slate-600 hover:text-blue-400 cursor-help transition-colors" />
+                <div className="invisible group-hover/tooltip:visible absolute right-0 top-full mt-3 w-72 p-5 bg-slate-900 border border-blue-500/30 rounded-2xl z-[60] shadow-2xl transition-all opacity-0 group-hover/tooltip:opacity-100 translate-y-1 group-hover/tooltip:translate-y-0 text-xs">
+                  <div className="flex items-center space-x-2 mb-3 text-blue-400">
+                    <Sparkles className="w-4 h-4" />
+                    <h4 className="font-bold uppercase tracking-wider">Hogyan szerezz kulcsot?</h4>
+                  </div>
+                  <ul className="space-y-3 text-slate-300 leading-relaxed">
+                    <li className="flex gap-2">
+                      <span className="text-blue-500 font-bold shrink-0">1.</span>
+                      <span>Kattints a melletted lévő kék nyíl ikonra az AI Studio megnyitásához.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-blue-500 font-bold shrink-0">2.</span>
+                      <span>Jelentkezz be Google fiókkal, majd kattints a <strong>"Create API key"</strong> gombra.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-blue-500 font-bold shrink-0">3.</span>
+                      <span>Másold ki az <strong>AIza...</strong> kezdetű kódot és illeszd be ide.</span>
+                    </li>
+                    <li className="text-[10px] text-slate-500 mt-2 border-t border-white/5 pt-2 italic">
+                      A kulcsot biztonságosan, csak a te böngésződben tároljuk 24 óráig.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="shrink-0 p-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/20 transition-all" title="Kulcs igénylése">
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+
+          <div className="hidden md:block text-blue-400 font-black tracking-tighter text-xl shrink-0">HR MÁGNES 2026</div>
         </div>
       </header>
 

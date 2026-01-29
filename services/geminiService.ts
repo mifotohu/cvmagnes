@@ -1,7 +1,14 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { GoogleGenAI, Type } from "@google/genai";
+
 export const generateHRMaterials = async (data: any) => {
-  // Az API kulcsot kizárólag a process.env.API_KEY változóból nyerjük ki az előírások szerint.
-  const ai = new GoogleGenAI({ apiKey: process.env.VITE_GEMINI_API_KEY });
+  // A kulcsot a UI-ból kapott adatból (customApiKey) vagy a környezeti változóból vesszük
+  const apiKey = data.customApiKey || process.env.API_KEY;
+  
+  if (!apiKey) {
+    throw new Error("Kérjük, add meg az API kulcsot a fejlécben!");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const systemInstruction = `Te egy 2026-os szintű Senior HR Technológus és ATS Optimalizálási Szakértő vagy. 
 Az a feladatod, hogy a megadott adatok alapján generálj egy professzionális pályázati csomagot.
